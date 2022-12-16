@@ -13,6 +13,7 @@ class ManageAppView(viewsets.ModelViewSet):
     serializers = {
         "default": ManageAppSerializer,
         "run": AppContainerHistorySerializer,
+        "history": AppContainerHistorySerializer,
     }
 
     def get_serializer_class(self):
@@ -47,3 +48,10 @@ class ManageAppView(viewsets.ModelViewSet):
             )
         except Exception as e:
             return Response(e)
+
+    @action(detail=True, methods=["get"], name="history")
+    def history(self, request, *args, **kwargs):
+        app = self.get_object()
+        app_container_run_history = AppContainerHistory.objects.filter(app=app)
+        serializer = self.get_serializer(app_container_run_history, many=True)
+        return Response(serializer.data)
