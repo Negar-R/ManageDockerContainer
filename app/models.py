@@ -14,7 +14,6 @@ class App(models.Model):
 
 
 class AppContainerHistory(models.Model):
-    # TODO: set it to cascade
     app = models.ForeignKey(App, null=True, on_delete=models.CASCADE)
     # As App object can be updated and it is possible to change its props, so it is required to consider
     # a new field for each of its props in this model.
@@ -29,3 +28,8 @@ class AppContainerHistory(models.Model):
 
     def __str__(self) -> str:
         return self.container_name
+
+
+# Note: It would be better to save logs(history of changes) in file. for example use logging of django.
+# But for now, we need to do some process on logs.e.g: Get the logs of one specific app(or do some filters)
+# So it would be useful to use DB to store them.

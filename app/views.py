@@ -31,6 +31,8 @@ class ManageAppView(viewsets.ModelViewSet):
         return self.serializers.get(self.action, self.serializers["default"])
 
     def destroy(self, request, *args, **kwargs):
+        # As containers are running instance of apps, so if an app object deleted, all its correspond
+        # containers should be removed even they be run.
         app_related_containers_id = list(
             AppContainerHistory.objects.filter(app=self.get_object()).values_list(
                 "container_short_id", flat=True
