@@ -9,6 +9,16 @@ from .serializers import ManageAppSerializer, AppContainerHistorySerializer
 
 
 class ManageAppView(viewsets.ModelViewSet):
+    """
+    A view to manage an App via the capabilities of:
+        - Create an app
+        - Update an app
+        - Delete an app and remove all its correspond containers
+        - Retrieve an app / Get list of apps
+        - Run a app by creating a container for it
+        - Get the history of app's containers logs
+    """
+
     queryset = App.objects.all()
     serializers = {
         "default": ManageAppSerializer,
@@ -19,6 +29,18 @@ class ManageAppView(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         return self.serializers.get(self.action, self.serializers["default"])
+
+    def destroy(self, request, *args, **kwargs):
+        app_related_containers_id = list(
+            AppContainerHistory.objects.filter(app=self.get_object()).values_list(
+                "container_short_id", flat=True
+            )
+        )
+        client = docker.from_env()
+        for container_id in app_related_containers_id:
+            container = client.containers.get(container_id)
+            container.remove(force=True)
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"], name="run")
     def run(self, request, *args, **kwargs):
