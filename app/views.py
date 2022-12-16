@@ -14,6 +14,7 @@ class ManageAppView(viewsets.ModelViewSet):
         "default": ManageAppSerializer,
         "run": AppContainerHistorySerializer,
         "history": AppContainerHistorySerializer,
+        "total_history": AppContainerHistorySerializer,
     }
 
     def get_serializer_class(self):
@@ -54,4 +55,10 @@ class ManageAppView(viewsets.ModelViewSet):
         app = self.get_object()
         app_container_run_history = AppContainerHistory.objects.filter(app=app)
         serializer = self.get_serializer(app_container_run_history, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], name="history")
+    def total_history(self, request, *args, **kwargs):
+        containers_history = AppContainerHistory.objects.all()
+        serializer = self.get_serializer(containers_history, many=True)
         return Response(serializer.data)
