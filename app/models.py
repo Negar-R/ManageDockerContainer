@@ -1,3 +1,5 @@
+import enum
+
 from django.db import models
 
 
@@ -13,6 +15,11 @@ class App(models.Model):
         return self.name
 
 
+class ContainerStatus(enum.Enum):
+    RUNNING = "running"
+    FINISHED = "finished"
+
+
 class AppContainerHistory(models.Model):
     app = models.ForeignKey(App, null=True, on_delete=models.CASCADE)
     # As App object can be updated and it is possible to change its props, so it is required to consider
@@ -22,7 +29,6 @@ class AppContainerHistory(models.Model):
     container_image = models.CharField(max_length=255)
     container_command = models.CharField(max_length=255, null=True, blank=True)
     container_envs = models.JSONField(default=dict)
-    container_status = models.CharField(max_length=100)
     container_logs = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
