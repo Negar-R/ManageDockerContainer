@@ -62,8 +62,6 @@ class ManageAppView(viewsets.ModelViewSet):
                 container_image=container.image,
                 container_command=app.command,
                 container_envs=app.envs,
-                # TODO: Be more precise about the status
-                container_status=container.status,
                 container_logs=container.logs(),
             )
             serializer = self.get_serializer(app_container_log)
@@ -77,12 +75,14 @@ class ManageAppView(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], name="history")
     def history(self, request, *args, **kwargs):
         app = self.get_object()
-        app_container_run_history = AppContainerHistory.objects.filter(app=app)
+        app_container_run_history = reversed(
+            AppContainerHistory.objects.filter(app=app)
+        )
         serializer = self.get_serializer(app_container_run_history, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"], name="history")
     def total_history(self, request, *args, **kwargs):
-        containers_history = AppContainerHistory.objects.all()
+        containers_history = reversed(AppContainerHistory.objects.all())
         serializer = self.get_serializer(containers_history, many=True)
         return Response(serializer.data)
