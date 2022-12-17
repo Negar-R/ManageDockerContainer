@@ -1,9 +1,8 @@
-import docker
-
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
+from ManageDockerContainer.docker import docker_client
 from .models import App, AppContainerHistory
 from .serializers import ManageAppSerializer, AppContainerHistorySerializer
 
@@ -38,9 +37,8 @@ class ManageAppView(viewsets.ModelViewSet):
                 "container_short_id", flat=True
             )
         )
-        client = docker.from_env()
         for container_id in app_related_containers_id:
-            container = client.containers.get(container_id)
+            container = docker_client.containers.get(container_id)
             container.remove(force=True)
         return super().destroy(request, *args, **kwargs)
 
@@ -48,14 +46,13 @@ class ManageAppView(viewsets.ModelViewSet):
     def run(self, request, *args, **kwargs):
         app = self.get_object()
         try:
-            client = docker.from_env()
-            container = client.containers.run(
+            container = docker_client.containers.run(
                 image=app.image,
                 command=app.command,
                 environment=app.envs,
                 detach=True,
             )
-            app_container_log = AppContainerHistory.objects.create(
+            app_container_history = AppContainerHistory.objects.create(
                 app=app,
                 container_short_id=container.short_id,
                 container_name=container.name,
@@ -64,7 +61,7 @@ class ManageAppView(viewsets.ModelViewSet):
                 container_envs=app.envs,
                 container_logs=container.logs(),
             )
-            serializer = self.get_serializer(app_container_log)
+            serializer = self.get_serializer(app_container_history)
             return Response(
                 serializer.data,
                 headers={"message": "container runs successfully"},

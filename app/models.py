@@ -15,13 +15,13 @@ class App(models.Model):
         return self.name
 
 
-class ContainerStatus(enum.Enum):
+class ContainerStatusEnum(enum.Enum):
     RUNNING = "running"
     FINISHED = "finished"
 
 
 class AppContainerHistory(models.Model):
-    app = models.ForeignKey(App, null=True, on_delete=models.CASCADE)
+    app = models.ForeignKey(App, on_delete=models.CASCADE)
     # As App object can be updated and it is possible to change its props, so it is required to consider
     # a new field for each of its props in this model.
     container_short_id = models.CharField(max_length=12, unique=True)
@@ -36,6 +36,6 @@ class AppContainerHistory(models.Model):
         return self.container_name
 
 
-# Note: It would be better to save logs(history of changes) in file. for example use logging of django.
-# But for now, we need to do some process on logs.e.g: Get the logs of one specific app(or do some filters)
+# Note: Generally, it would be better to save logs(history of changes) in file. for example use logging of django.
+# But for now, we need to do some process on logs.e.g: Get the logs of one specific app(or do some filters).
 # So it would be useful to use DB to store them.

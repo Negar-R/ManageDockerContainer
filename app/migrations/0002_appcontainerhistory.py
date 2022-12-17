@@ -37,7 +37,6 @@ class Migration(migrations.Migration):
                 (
                     "app",
                     models.ForeignKey(
-                        null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="app.app",
                     ),
